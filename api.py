@@ -3,12 +3,15 @@ FastAPI application for Sauce Recipe RAG System
 Provides REST API endpoints for querying sauce recipes
 """
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Depends, status
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
 from fastapi.responses import JSONResponse
 import uvicorn
 from typing import Optional
 import logging
 import os
+import secrets
+import hashlib
 
 # Try to import RAG system components
 try:
@@ -25,10 +28,42 @@ except ImportError as e:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Initialize HTTP Basic Auth
+security = HTTPBasic()
+
+# Authentication configuration
+def get_auth_credentials():
+    """Get authentication credentials from environment variables"""
+    username = os.getenv("API_USERNAME")
+    password = os.getenv("API_PASSWORD")
+    
+    if not username or not password:
+        raise ValueError(
+            "API_USERNAME and API_PASSWORD environment variables must be set"
+        )
+    
+    return username, password
+
+def verify_credentials(credentials: HTTPBasicCredentials = Depends(security)):
+    """Verify user credentials"""
+    username, password = get_auth_credentials()
+    
+    # Use secrets.compare_digest to prevent timing attacks
+    correct_username = secrets.compare_digest(credentials.username, username)
+    correct_password = secrets.compare_digest(credentials.password, password)
+    
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication credentials",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
 # Initialize FastAPI app
 app = FastAPI(
     title="Sauce Recipe RAG API",
-    description="A RAG system API for Polish sauce recipes using ChromaDB and OpenAI",
+    description="A RAG system API for Polish sauce recipes using ChromaDB and OpenAI (Protected)",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc"
@@ -72,15 +107,17 @@ async def startup_event():
 
 @app.get("/")
 async def root():
-    """Root endpoint with API information"""
+    """Root endpoint with API information - Public endpoint"""
     return {
         "message": "Sauce Recipe RAG API",
         "description": "Ask questions about Polish sauce recipes",
+        "status": "Protected API - Authentication required",
         "endpoints": {
-            "query": "/query?q=your_question",
-            "docs": "/docs",
-            "health": "/health"
+            "query": "/query?q=your_question (🔒 Protected)",
+            "docs": "/docs (🔒 Protected)",
+            "health": "/health (Public)"
         },
+        "authentication": "HTTP Basic Auth required for protected endpoints",
         "example_queries": [
             "Jak zrobić sos czosnkowy?",
             "Jaki sos pasuje do ryby?",
@@ -93,7 +130,8 @@ async def root():
 @app.get("/query")
 async def query_sauce_recipes(
     q: str = Query(..., description="Your question about sauce recipes in Polish"),
-    max_results: Optional[int] = Query(3, description="Maximum number of recipes to retrieve", ge=1, le=10)
+    max_results: Optional[int] = Query(3, description="Maximum number of recipes to retrieve", ge=1, le=10),
+    current_user: str = Depends(verify_credentials)
 ):
     """
     Query the sauce recipe knowledge base
@@ -167,10 +205,11 @@ async def health_check():
 
 
 @app.get("/test")
-async def test_endpoint():
-    """Simple test endpoint"""
+async def test_endpoint(current_user: str = Depends(verify_credentials)):
+    """Simple test endpoint - Protected"""
     return {
         "message": "API is working!",
+        "authenticated_user": current_user,
         "port": os.getenv("PORT", "8000"),
         "openai_key_set": bool(os.getenv("OPENAI_API_KEY")),
         "rag_available": RAG_AVAILABLE,

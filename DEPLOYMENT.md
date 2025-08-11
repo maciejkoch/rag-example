@@ -21,10 +21,12 @@
    - Connect your repository
    - Railway will auto-detect it's a Python project
 
-3. **Add Environment Variable**:
+3. **Add Environment Variables**:
 
    - In Railway dashboard → Variables
    - Add: `OPENAI_API_KEY` = `your_openai_api_key_here`
+   - **Required**: `API_USERNAME` = `your_chosen_username`
+   - **Required**: `API_PASSWORD` = `your_chosen_password`
 
 4. **Deploy!**
    - Railway will automatically build and deploy
