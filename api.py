@@ -8,8 +8,18 @@ from fastapi.responses import JSONResponse
 import uvicorn
 from typing import Optional
 import logging
-from rag_system import SimpleRAGSystem
-from sample_documents import SAMPLE_DOCUMENTS
+import os
+
+# Try to import RAG system components
+try:
+    from rag_system import SimpleRAGSystem
+    from sample_documents import SAMPLE_DOCUMENTS
+    RAG_AVAILABLE = True
+except ImportError as e:
+    print(f"Warning: RAG system not available: {e}")
+    RAG_AVAILABLE = False
+    SimpleRAGSystem = None
+    SAMPLE_DOCUMENTS = []
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,11 +42,16 @@ rag_system = None
 async def startup_event():
     """Initialize the RAG system on startup"""
     global rag_system
+    logger.info("App starting up...")
+    
+    if not RAG_AVAILABLE:
+        logger.warning("RAG system dependencies not available - running in limited mode")
+        return
+    
     try:
         logger.info("Initializing Sauce Recipe RAG System...")
         
         # Check if OpenAI API key is available
-        import os
         api_key = os.getenv("OPENAI_API_KEY")
         if not api_key:
             logger.warning("OPENAI_API_KEY not found - RAG system will be limited")
@@ -88,6 +103,9 @@ async def query_sauce_recipes(
     
     Returns relevant sauce recipes and an AI-generated answer.
     """
+    if not RAG_AVAILABLE:
+        raise HTTPException(status_code=503, detail="RAG system dependencies not available")
+    
     if not rag_system:
         raise HTTPException(status_code=503, detail="RAG system not initialized")
     
@@ -144,38 +162,20 @@ async def query_sauce_recipes(
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint"""
-    import os
-    
-    # Basic health check - always return healthy if app is running
-    health_info = {
-        "status": "healthy",
-        "app": "running",
-        "message": "Sauce Recipe RAG API is running"
+    """Health check endpoint - simplified for Railway"""
+    return {"status": "ok", "app": "running"}
+
+
+@app.get("/test")
+async def test_endpoint():
+    """Simple test endpoint"""
+    return {
+        "message": "API is working!",
+        "port": os.getenv("PORT", "8000"),
+        "openai_key_set": bool(os.getenv("OPENAI_API_KEY")),
+        "rag_available": RAG_AVAILABLE,
+        "rag_system_initialized": rag_system is not None
     }
-    
-    # Check OpenAI API key
-    api_key = os.getenv("OPENAI_API_KEY")
-    if not api_key:
-        health_info["openai_key"] = "missing"
-        health_info["warning"] = "OpenAI API key not configured"
-    else:
-        health_info["openai_key"] = "configured"
-    
-    # Check RAG system status
-    if not rag_system:
-        health_info["rag_system"] = "not_initialized"
-        health_info["warning"] = health_info.get("warning", "") + " RAG system not ready"
-    else:
-        try:
-            collection_count = rag_system.collection.count()
-            health_info["rag_system"] = "initialized"
-            health_info["recipes_loaded"] = collection_count
-        except Exception as e:
-            health_info["rag_system"] = "error"
-            health_info["rag_error"] = str(e)
-    
-    return health_info
 
 
 if __name__ == "__main__":
