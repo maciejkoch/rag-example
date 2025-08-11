@@ -1,6 +1,6 @@
-# Simple RAG System
+# Sauce Recipe RAG System
 
-A basic Retrieval-Augmented Generation (RAG) system using Python, ChromaDB, and OpenAI.
+A basic Retrieval-Augmented Generation (RAG) system for sauce recipes using Python, ChromaDB, and OpenAI.
 
 ## What is RAG?
 
@@ -12,10 +12,11 @@ Retrieval-Augmented Generation (RAG) is a technique that combines information re
 
 ## Features
 
-- Document embedding and storage using ChromaDB
+- Document embedding and storage using ChromaDB with **persistent storage**
 - Semantic search using OpenAI embeddings
 - Answer generation using OpenAI GPT models
-- Simple demo with sample documents
+- Simple demo with Polish sauce recipes
+- Data persistence across sessions (documents stored in `./chroma/` directory)
 
 ## Setup
 
@@ -83,21 +84,26 @@ Unlike JavaScript's `node_modules/`, Python uses:
 ## How it works
 
 1. **Document Ingestion**: Sample documents are embedded using OpenAI's `text-embedding-ada-002` model
-2. **Storage**: Embeddings are stored in ChromaDB for fast similarity search
-3. **Retrieval**: When you ask a question, the system finds the most relevant documents
-4. **Generation**: The retrieved documents are used as context for GPT-3.5-turbo to generate an answer
+2. **Persistent Storage**: Embeddings are stored in ChromaDB's persistent database (`./chroma/` directory)
+3. **Smart Loading**: On subsequent runs, existing documents are detected and skipped (no re-embedding needed)
+4. **Retrieval**: When you ask a question, the system finds the most relevant documents using semantic search
+5. **Generation**: The retrieved documents are used as context for GPT-3.5-turbo to generate an answer
 
 ## Project Structure
 
 ```
 python-rag/
-├── rag_system.py          # Main RAG implementation
-├── sample_documents.py    # Sample data for testing
+├── rag_system.py          # Main RAG implementation (with persistent storage)
+├── sample_documents.py    # Polish sauce recipes for testing
 ├── interactive_demo.py    # Interactive demo script
 ├── setup.py              # Setup script for easy installation
 ├── requirements.txt       # Python dependencies
 ├── .gitignore            # Git ignore file
-└── README.md             # This file
+├── README.md             # This file
+├── chroma/               # ChromaDB persistent storage (auto-created)
+│   ├── chroma.sqlite3    # Main database file
+│   └── [UUID]/           # Vector index files
+└── venv/                 # Virtual environment
 ```
 
 ## Example Usage
@@ -110,31 +116,66 @@ rag = SimpleRAGSystem()
 
 # Add your documents
 documents = [
-    {"id": "doc1", "content": "Your document content here..."}
+    {"id": "sauce1", "content": "Sos czosnkowy: Wymieszaj jogurt grecki z czosnkiem..."}
 ]
 rag.add_documents(documents)
 
 # Ask questions
-answer = rag.ask_question("What is Python?")
+answer = rag.ask_question("Jak zrobić sos czosnkowy?")
 print(answer)
 ```
 
 ## Sample Questions
 
-The demo includes sample documents about:
+The demo includes Polish sauce recipes:
 
-- Python programming language
-- Machine Learning
-- ChromaDB
-- OpenAI GPT models
-- RAG methodology
+- Garlic sauce (Sos czosnkowy)
+- Tomato sauce for pasta (Sos pomidorowy)
+- BBQ sauce (Sos barbecue)
+- Dill sauce for fish (Sos koperkowy)
+- Tzatziki sauce
+- Mushroom sauce (Sos pieczarkowy)
+- Sweet chili sauce
+- Pesto sauce
+- Honey-mustard sauce (Sos musztardowo-miodowy)
+- Herb yogurt sauce (Sos jogurtowo-ziołowy)
 
 Try asking questions like:
 
-- "What is Python programming language?"
-- "How does ChromaDB work?"
-- "What is Retrieval-Augmented Generation?"
-- "Tell me about machine learning"
+- "Jak zrobić sos czosnkowy?" (How to make garlic sauce?)
+- "Jaki sos pasuje do ryby?" (Which sauce goes with fish?)
+- "Potrzebuję przepisu na sos do makaronu" (I need a pasta sauce recipe)
+- "Jakie sosy są idealne do grilla?" (Which sauces are perfect for grilling?)
+
+## Persistent Storage
+
+The system now uses **persistent storage** for better performance and data retention:
+
+### First Run
+
+- Documents are embedded using OpenAI API (takes time)
+- Embeddings stored in `./chroma/` directory
+- Database files created automatically
+
+### Subsequent Runs
+
+- Existing documents detected and skipped
+- **Much faster startup** (no re-embedding needed)
+- Data persists between sessions
+- Can add new documents without losing existing ones
+
+### Storage Location
+
+- **Database**: `./chroma/chroma.sqlite3` (metadata, documents, embeddings)
+- **Vector Index**: `./chroma/[UUID]/` (HNSW index files for fast search)
+- **Size**: Typically ~188KB for sample documents
+
+### Benefits
+
+- ✅ **Faster restarts** - no re-embedding of existing documents
+- ✅ **Data persistence** - knowledge base survives program restarts
+- ✅ **Incremental growth** - add new documents without losing old ones
+- ✅ **Production ready** - suitable for building real applications
 
 ## Dependencies
 
@@ -144,7 +185,7 @@ Try asking questions like:
 
 ## Note
 
-This is a simple educational example. For production use, consider:
+This is a simple educational example with **persistent storage enabled**. For production use, consider:
 
 - Error handling and retries
 - Async operations for better performance
@@ -152,3 +193,5 @@ This is a simple educational example. For production use, consider:
 - Metadata filtering
 - Cost optimization
 - Security best practices
+- Database backup strategies
+- Storage cleanup and maintenance

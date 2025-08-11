@@ -1,6 +1,7 @@
 """
-Simple RAG (Retrieval-Augmented Generation) System
+Sauce Recipe RAG (Retrieval-Augmented Generation) System
 Using ChromaDB for vector storage and OpenAI for embeddings and generation
+Specialized for Polish sauce recipes
 """
 
 import os
@@ -23,16 +24,16 @@ class SimpleRAGSystem:
 
         self.client = openai.OpenAI()
 
-        # Set up ChromaDB
-        self.chroma_client = chromadb.Client()
+        # Set up ChromaDB with persistent storage
+        self.chroma_client = chromadb.PersistentClient(path="./chroma")
 
         # Create or get collection
         self.collection = self.chroma_client.get_or_create_collection(
-            name="documents",
-            metadata={"description": "A collection of sample documents"}
+            name="sauce_recipes",
+            metadata={"description": "A collection of Polish sauce recipes"}
         )
         
-        print("RAG System initialized successfully!")
+        print("Sauce Recipe RAG System initialized successfully!")
     
     def get_embedding(self, text):
         """Get embeddings from OpenAI"""
@@ -50,7 +51,19 @@ class SimpleRAGSystem:
         """Add documents to the ChromaDB collection"""
         print("Adding documents to the database...")
 
+        # Check existing documents to avoid duplicates
+        try:
+            existing_docs = self.collection.get()
+            existing_ids = set(existing_docs["ids"]) if existing_docs["ids"] else set()
+        except Exception:
+            existing_ids = set()
+
+        added_count = 0
         for doc in documents:
+            if doc["id"] in existing_ids:
+                print(f"Document {doc['id']} already exists, skipping...")
+                continue
+                
             # Get embedding for the document
             embedding = self.get_embedding(doc["content"])
             if embedding:
@@ -62,9 +75,12 @@ class SimpleRAGSystem:
                     ids=[doc["id"]]
                 )
                 print(f"Added document: {doc['id']}")
+                added_count += 1
 
-        count = len(documents)
-        print(f"Successfully added {count} documents to the database.")
+        if added_count > 0:
+            print(f"Successfully added {added_count} new documents to the database.")
+        else:
+            print("All documents already exist in the database.")
     
     def search_documents(self, query, n_results=3):
         """Search for relevant documents based on query"""
@@ -145,21 +161,21 @@ Answer:"""
 
 
 def main():
-    """Main function to demonstrate the RAG system"""
-    print("Setting up Simple RAG System...")
+    """Main function to demonstrate the sauce recipe RAG system"""
+    print("Setting up Sauce Recipe RAG System...")
 
     # Initialize RAG system
     rag = SimpleRAGSystem()
 
-    # Add sample documents
+    # Add sauce recipes
     rag.add_documents(SAMPLE_DOCUMENTS)
 
-    # Example questions
+    # Example questions about sauce recipes
     questions = [
-        "What is Python programming language?",
-        "How does ChromaDB work?",
-        "What is Retrieval-Augmented Generation?",
-        "Tell me about machine learning"
+        "Jak zrobić sos czosnkowy?",
+        "Jaki sos pasuje do ryby?",
+        "Potrzebuję przepisu na sos do makaronu",
+        "Jakie sosy są idealne do grilla?"
     ]
 
     # Ask questions
@@ -167,7 +183,7 @@ def main():
         rag.ask_question(question)
         input("\nPress Enter to continue to the next question...")
 
-    print("\nRAG Demo completed!")
+    print("\nSauce Recipe RAG Demo completed!")
 
 
 if __name__ == "__main__":

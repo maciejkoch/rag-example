@@ -1,47 +1,67 @@
 """
-Sample documents for testing the RAG system
+Sample sauce recipes for testing the RAG system
 """
 
 SAMPLE_DOCUMENTS = [
     {
-        "id": "doc1",
-        "content": "Python is a high-level, interpreted programming language "
-                   "with dynamic semantics. Its high-level built-in data "
-                   "structures, combined with dynamic typing and dynamic "
-                   "binding, make it very attractive for Rapid Application "
-                   "Development, as well as for use as a scripting or glue "
-                   "language to connect existing components together."
+        "id": "sauce1",
+        "content": "Sos czosnkowy: Wymieszaj 200 g jogurtu greckiego z 2 "
+                   "posiekanymi ząbkami czosnku, łyżką majonezu, szczyptą soli, "
+                   "pieprzu i kilkoma kroplami soku z cytryny. Odstaw na 30 minut "
+                   "do lodówki, aby smaki się przegryzły."
     },
     {
-        "id": "doc2",
-        "content": "Machine Learning is a subset of artificial intelligence "
-                   "(AI) that provides systems the ability to automatically "
-                   "learn and improve from experience without being explicitly "
-                   "programmed. Machine learning focuses on the development of "
-                   "computer programs that can access data and use it to learn "
-                   "for themselves."
+        "id": "sauce2",
+        "content": "Sos pomidorowy do makaronu: Podsmaż na oliwie posiekaną cebulę, "
+                   "dodaj 2 ząbki czosnku i puszkę pomidorów. Dopraw solą, pieprzem, "
+                   "bazylią i oregano. Duś 15 minut na małym ogniu."
     },
     {
-        "id": "doc3",
-        "content": "ChromaDB is an open-source embedding database. It gives "
-                   "you the tools to store document embeddings, metadata "
-                   "and to query them. Chroma is designed to be simple to use "
-                   "and easy to integrate into your existing applications."
+        "id": "sauce3",
+        "content": "Sos barbecue: W rondelku wymieszaj 200 ml ketchupu, 2 łyżki "
+                   "octu jabłkowego, 1 łyżkę miodu, 1 łyżkę sosu Worcestershire, "
+                   "pół łyżeczki wędzonej papryki i szczyptę pieprzu cayenne. "
+                   "Gotuj 10 minut, mieszając."
     },
     {
-        "id": "doc4",
-        "content": "OpenAI GPT models are large language models that can "
-                   "generate human-like text based on the input they receive. "
-                   "These models are trained on diverse internet text and can "
-                   "perform various natural language tasks like answering "
-                   "questions, writing essays, and creating summaries."
+        "id": "sauce4",
+        "content": "Sos koperkowy do ryb: Rozpuść łyżkę masła, dodaj łyżkę mąki, "
+                   "wymieszaj, wlej 200 ml bulionu warzywnego i 100 ml śmietany. "
+                   "Dodaj posiekany świeży koperek, dopraw solą i pieprzem."
     },
     {
-        "id": "doc5",
-        "content": "Retrieval-Augmented Generation (RAG) is a technique "
-                   "that combines information retrieval with text generation. "
-                   "It works by first retrieving relevant documents from a "
-                   "knowledge base, then using those documents as context to "
-                   "generate more accurate and informed responses."
+        "id": "sauce5",
+        "content": "Sos tzatziki: Zetrzyj pół ogórka na tarce, odciśnij sok. "
+                   "Połącz z 200 g jogurtu greckiego, 1 ząbkiem czosnku, "
+                   "łyżką oliwy z oliwek i szczyptą soli."
+    },
+    {
+        "id": "sauce6",
+        "content": "Sos pieczarkowy: Podsmaż 200 g pieczarek z cebulą na maśle. "
+                   "Dodaj 100 ml śmietany i dopraw solą, pieprzem oraz odrobiną "
+                   "tymianu. Duś 5 minut."
+    },
+    {
+        "id": "sauce7",
+        "content": "Sos sweet chili: W rondelku połącz 200 ml wody, 100 g cukru, "
+                   "3 łyżki octu ryżowego, 2 posiekane papryczki chili, 2 ząbki "
+                   "czosnku i 1 łyżkę sosu sojowego. Gotuj 10 minut."
+    },
+    {
+        "id": "sauce8",
+        "content": "Sos pesto: Zblenduj 50 g bazylii, 50 g parmezanu, 30 g orzeszków "
+                   "pinii, 1 ząbek czosnku i 100 ml oliwy z oliwek. Dopraw solą."
+    },
+    {
+        "id": "sauce9",
+        "content": "Sos musztardowo-miodowy: Wymieszaj 3 łyżki musztardy "
+                   "dijon, 2 łyżki miodu i 1 łyżkę soku z cytryny. Idealny do "
+                   "sałatek i kurczaka."
+    },
+    {
+        "id": "sauce10",
+        "content": "Sos jogurtowo-ziołowy: Wymieszaj 200 g jogurtu naturalnego "
+                   "z posiekanym koperkiem, pietruszką i szczypiorkiem. "
+                   "Dopraw solą, pieprzem i odrobiną soku z cytryny."
     }
 ]

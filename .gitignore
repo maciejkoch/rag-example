@@ -24,7 +24,8 @@ wheels/
 *.egg
 MANIFEST
 
-# ChromaDB
+# ChromaDB persistent storage
+chroma/
 chroma_db/
 *.db
 
