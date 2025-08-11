@@ -18,11 +18,17 @@ class SimpleRAGSystem:
     def __init__(self):
         """Initialize the RAG system with ChromaDB and OpenAI"""
         # Set up OpenAI
-        openai.api_key = os.getenv("OPENAI_API_KEY")
-        if not openai.api_key:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
             raise ValueError("Please set your OPENAI_API_KEY in a .env file")
 
-        self.client = openai.OpenAI()
+        # Initialize OpenAI client with explicit API key
+        try:
+            self.client = openai.OpenAI(api_key=api_key)
+        except Exception as e:
+            # Fallback for older OpenAI versions
+            openai.api_key = api_key
+            self.client = openai.OpenAI()
 
         # Set up ChromaDB with persistent storage
         self.chroma_client = chromadb.PersistentClient(path="./chroma")
