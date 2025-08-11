@@ -68,7 +68,8 @@ This will:
 ### Running the System
 
 1. **Activate virtual environment** (if not already activated)
-2. **Run the demos:**
+2. **Choose your mode:**
+   - **API Server:** `python run_api.py` (Recommended for web access)
    - **Demo mode:** `python rag_system.py`
    - **Interactive mode:** `python interactive_demo.py`
 
@@ -95,6 +96,8 @@ Unlike JavaScript's `node_modules/`, Python uses:
 python-rag/
 ├── rag_system.py          # Main RAG implementation (with persistent storage)
 ├── sample_documents.py    # Polish sauce recipes for testing
+├── api.py                 # FastAPI web server
+├── run_api.py            # Script to start the API server
 ├── interactive_demo.py    # Interactive demo script
 ├── setup.py              # Setup script for easy installation
 ├── requirements.txt       # Python dependencies
@@ -177,11 +180,92 @@ The system now uses **persistent storage** for better performance and data reten
 - ✅ **Incremental growth** - add new documents without losing old ones
 - ✅ **Production ready** - suitable for building real applications
 
+## API Usage
+
+The project now includes a **FastAPI web server** for easy integration:
+
+### Starting the API Server
+
+```bash
+# Activate virtual environment first
+source venv/bin/activate  # macOS/Linux
+# or: venv\Scripts\activate  # Windows
+
+# Start the API server
+python run_api.py
+```
+
+The server will be available at:
+
+- **Main API**: http://localhost:8000
+- **Documentation**: http://localhost:8000/docs (Interactive Swagger UI)
+- **Alternative docs**: http://localhost:8000/redoc
+- **Health check**: http://localhost:8000/health
+
+### API Endpoints
+
+#### `GET /query` - Query Sauce Recipes
+
+Ask questions about sauce recipes and get AI-generated answers.
+
+**Parameters:**
+
+- `q` (required): Your question about sauce recipes (preferably in Polish)
+- `max_results` (optional): Number of recipes to retrieve (1-10, default: 3)
+
+**Example requests:**
+
+```bash
+# Basic query
+curl "http://localhost:8000/query?q=Jak zrobić sos czosnkowy?"
+
+# With custom result limit
+curl "http://localhost:8000/query?q=Jaki sos pasuje do ryby?&max_results=5"
+```
+
+**Example response:**
+
+```json
+{
+  "query": "Jak zrobić sos czosnkowy?",
+  "answer": "Aby zrobić sos czosnkowy, wymieszaj 200 g jogurtu greckiego z 2 posiekanymi ząbkami czosnku...",
+  "retrieved_recipes": [
+    {
+      "rank": 1,
+      "recipe_id": "sauce1",
+      "content": "Sos czosnkowy: Wymieszaj 200 g jogurtu greckiego...",
+      "similarity_score": 0.9234
+    }
+  ],
+  "total_recipes_found": 1
+}
+```
+
+#### `GET /health` - Health Check
+
+Check if the API and RAG system are working properly.
+
+#### `GET /` - API Information
+
+Get information about available endpoints and example queries.
+
+### Sample Queries
+
+Try these Polish sauce recipe questions:
+
+- `Jak zrobić sos czosnkowy?` (How to make garlic sauce?)
+- `Jaki sos pasuje do ryby?` (Which sauce goes with fish?)
+- `Potrzebuję przepisu na sos do makaronu` (I need a pasta sauce recipe)
+- `Jakie sosy są idealne do grilla?` (Which sauces are perfect for grilling?)
+- `Jak przygotować sos pesto?` (How to prepare pesto sauce?)
+
 ## Dependencies
 
 - `chromadb`: Vector database for storing and searching embeddings
 - `openai`: OpenAI API client for embeddings and text generation
 - `python-dotenv`: For loading environment variables
+- `fastapi`: Modern web framework for building APIs
+- `uvicorn`: ASGI server for running FastAPI applications
 
 ## Note
 
